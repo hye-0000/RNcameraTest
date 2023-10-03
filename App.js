@@ -10,6 +10,19 @@ export default function App() {
   const [videoURI, setVideoURI] = useState(null);
   const [refresh, setRefresh] = useState(false); // 버튼 눌림 여부를 추적하는 상태
   const [isRecording, setIsRecording] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  // 카운트 다운 시작 함수
+  const startCountdown = () => {
+    let timer = setInterval(() => {
+      setCountdown(prevCountdown => prevCountdown - 1);
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      startRecording();
+    }, 3000);
+  };
+
   const startRecording = async () => {
     if (cameraRef.current) {
       try {
@@ -17,6 +30,7 @@ export default function App() {
         const saveUri = await CameraRoll.saveToCameraRoll(uri, 'video');
         console.log('동영상이 저장된 경로:', uri);
         console.log('사진앱에 저장된 경로: ', saveUri);
+        setCountdown(3); // 카운트 다운 초기화
       } catch (error) {
         console.error('동영상 녹화 중 오류 발생:', error);
       }
@@ -76,11 +90,12 @@ export default function App() {
         type={RNCamera.Constants.Type.back}
         autoFocus={RNCamera.Constants.AutoFocus.on}
       />
+      {countdown > 0 && <Text style={styles.countdownText}>{countdown}초</Text>}
       <TouchableOpacity
         style={styles.mainButton}
         onPress={() => {
           if (!isRecording) {
-            startRecording();
+            startCountdown(); // 카운트 다운 시작
             setIsRecording(true);
           } else {
             stopRecording();
