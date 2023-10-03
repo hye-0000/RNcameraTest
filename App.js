@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import Video from 'react-native-video';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import RNFS from 'react-native-fs';
 
 export default function App() {
   const [videoURI, setVideoURI] = useState(null);
@@ -18,8 +19,19 @@ export default function App() {
 
       if (response && response.edges.length > 0) {
         const mostRecentVideo = response.edges[0].node.image.uri;
-        setVideoURI(mostRecentVideo);
+        // setVideoURI(mostRecentVideo);
+        // console.log('mostRecentVideo: ', mostRecentVideo);
+
+        // 'ph://' 형식의 동영상 URI를 복사할 대상 경로
+        const destPath = RNFS.DocumentDirectoryPath + '/myVideo.mov';
+
+        // 'ph://' 형식의 동영상 URI를 복사
+        await RNFS.copyAssetsVideoIOS(mostRecentVideo, destPath);
+
+        // 복사된 동영상 파일의 경로를 설정하여 상태 업데이트
+        setVideoURI(destPath);
         console.log('mostRecentVideo: ', mostRecentVideo);
+        console.log('복사된 동영상 경로:', destPath);
       } else {
         console.log('동영상을 찾을 수 없습니다.');
       }
