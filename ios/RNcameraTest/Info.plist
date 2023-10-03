@@ -53,5 +53,9 @@
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Access to Photos library is required to play videos</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera permission is required to shoot video.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone permission is required to shoot video.</string>
 </dict>
 </plist>
