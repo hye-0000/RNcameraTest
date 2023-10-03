@@ -1,12 +1,33 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import Video from 'react-native-video';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import RNFS from 'react-native-fs';
+import {RNCamera} from 'react-native-camera';
 
 export default function App() {
+  const cameraRef = useRef(null); // 카메라 컴포넌트에 대한 ref를 생성
   const [videoURI, setVideoURI] = useState(null);
   const [refresh, setRefresh] = useState(false); // 버튼 눌림 여부를 추적하는 상태
+  const [isRecording, setIsRecording] = useState(false);
+  const startRecording = async () => {
+    if (cameraRef.current) {
+      try {
+        const { uri } = await cameraRef.current.recordAsync();
+        const saveUri = await CameraRoll.saveToCameraRoll(uri, 'video');
+        console.log('동영상이 저장된 경로:', uri);
+        console.log('사진앱에 저장된 경로: ', saveUri);
+      } catch (error) {
+        console.error('동영상 녹화 중 오류 발생:', error);
+      }
+    }
+  };
+
+  const stopRecording = async () => {
+    if (cameraRef.current) {
+      cameraRef.current.stopRecording();
+    }
+  };
 
   // 비디오 가져오기 함수
   const getLatestVideo = async () => {
@@ -19,11 +40,9 @@ export default function App() {
 
       if (response && response.edges.length > 0) {
         const mostRecentVideo = response.edges[0].node.image.uri;
-        // setVideoURI(mostRecentVideo);
-        // console.log('mostRecentVideo: ', mostRecentVideo);
 
         // 'ph://' 형식의 동영상 URI를 복사할 대상 경로
-        const destPath = RNFS.DocumentDirectoryPath + '/myVideo.mov';
+        const destPath = RNFS.DocumentDirectoryPath + '/myVideo1.mov';
 
         // 'ph://' 형식의 동영상 URI를 복사
         await RNFS.copyAssetsVideoIOS(mostRecentVideo, destPath);
@@ -50,7 +69,28 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> My First React Native</Text>
+      <Text style={styles.title}> 제발 좀 되라고</Text>
+      <RNCamera
+        ref={cameraRef}
+        style={styles.camera}
+        type={RNCamera.Constants.Type.back}
+        autoFocus={RNCamera.Constants.AutoFocus.on}
+      />
+      <TouchableOpacity
+        style={styles.mainButton}
+        onPress={() => {
+          if (!isRecording) {
+            startRecording();
+            setIsRecording(true);
+          } else {
+            stopRecording();
+            setIsRecording(false);
+          }
+        }}>
+        <Text style={styles.buttonText}>
+          {isRecording ? '녹화 중지' : '녹화 시작'}
+        </Text>
+      </TouchableOpacity>
       {videoURI ? (
         <Video
           source={{uri: videoURI}}
@@ -81,6 +121,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
+  },
+  camera: {
+    width: 300,
+    height: 200,
+    marginBottom: 20,
   },
   mainButton: {
     padding: 12,
