@@ -14,6 +14,7 @@
     "@react-native-community/cli-doctor": "^11.3.8",
     "react": "18.2.0",
     "react-native": "0.72.5",
+    "react-native-fs": "^2.20.0",
     "react-native-video": "^5.2.1"
   },
   "devDependencies": {
